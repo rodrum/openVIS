@@ -58,7 +58,7 @@ def create_output_dataframes():
             'Back-Azimuth (deg)': [0.0],
             'Distance (km)': [0.0],
             'Datetime (UTC)': [datetime(1, 1, 1, tzinfo=timezone.utc)],
-            'Average Source Amplitude (Pa)': [0.0],
+            'Mean Source Amplitude (Pa)': [0.0],
             'Persistency': [0.0],
             'Mean Frequency (Hz)': [0.0]
         }

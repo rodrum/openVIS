@@ -21,7 +21,7 @@ class IP:
     nb_det : int
         Number of detections that were recorded during this IP time interval.
     avg_amp : float
-        Average amplitude of the detections during this IP time interval.
+        mean amplitude of the detections during this IP time interval.
     fmaean : float
         Mean frequency of the detections during the IP time interval.
     vratio : float
