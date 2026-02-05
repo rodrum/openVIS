@@ -335,7 +335,7 @@ for ax_i, sta in enumerate(sorted_stat_list):
     ax_ip.spines[['right', 'top', 'bottom']].set_visible(False)
     ax_ip.grid(axis='x')
 
-    amp_1km = ip['Average Source Amplitude (Pa)'].values
+    amp_1km = ip['Mean Source Amplitude (Pa)'].values
     date_times_amp = ip['Datetime (UTC)'].values
 
     # Plot IP data
