@@ -42,7 +42,7 @@ which are the re-processing products of PMCC bulletins
 from the IMS network
 ([Hupe et al., 2022](https://doi.org/10.5194/essd-14-4201-2022)).
 Specifically, we use the "high-frequency" (1-3 Hz) open-access bulletins,
-which can be downloaded from the [German Federal Institute for Geosciences and Natural Resources (BGR) geoportal](https://geoportal.bgr.de/mapapps/resources/apps/geoportal/index.html) (go to "Geophisics", then search for "infrasound" in upper top search, then use category "Dataset" in the left to show the dataset named "Higher frequency data products...").
+which can be downloaded from the [German Federal Institute for Geosciences and Natural Resources (BGR) geoportal](https://geoportal.bgr.de/mapapps/resources/apps/geoportal/index.html?lang=en#/search?term=10.5194%2Fessd-14-4201-2022&core&filter=%7B%22md_type_facet%22%3A%5B%22Daten%22%5D%7D) (it should be the dataset named "Higher frequency data products of the International Monitoring System’s infrasound stations").
 
 ## History and Acknowledgments
 
@@ -296,7 +296,7 @@ Each file should have the naming convention formats as the following examples:
 	with 361 veff-ratio values from 0 to 360 degrees 
 	(i.e., a whole circle in steps of 1 degree) for each time.
 	In `examples/example.ipynb`, 
-	the explicit structure of a Matlab binar is shown.
+	the explicit structure of a Matlab binary is shown.
 
 	The structure for the netCDF binaries should be similar. Please check
 	the functions `fill_vratio_clim` and `read_veffrat_bgr` 
@@ -400,16 +400,16 @@ _Note: `[FORMATS]` is a somewhat redundant. In the future I'd like to induce the
 Inside the folder `examples`, I have included a minimal set of data that can be used to test the VIS. 
 
 The bulletins come from the larger, multi-year (2003-2024) open-access datasets mentioned earlier (In "What is a detection" section),
-which can be downloaded as well from the [Geoportal of the Federal Institute for Geosciences and Natural Resources (Germany)](https://geoportal.bgr.de/).
+which can be downloaded as well from the [Geoportal of the Federal Institute for Geosciences and Natural Resources (Germany)](https://geoportal.bgr.de/mapapps/resources/apps/geoportal/index.html?lang=en#/search?term=10.5194%2Fessd-14-4201-2022&core&filter=%7B%22md_type_facet%22%3A%5B%22Daten%22%5D%7D) as previously mentioned.
 
-The python jupyter notebook `examples/example.ipynb` is the place to learn to run and visualize VIS results. It contains instructions and insights based on bulletins for three IMS station that were detecting around the eruption of June 2011 Cordón Caulle, Chile. You can access this Jupyer lab Python notebook by launching Jupyer lab after activating the conda `openvis` environment:
+The python jupyter notebook `examples/example.ipynb` is the place to learn to run and visualize VIS results. It contains instructions and insights based on bulletins for three IMS station that were detecting around the eruption of June 2011 Cordón Caulle, Chile. You can access this Jupyter lab Python notebook by launching Jupyter lab after activating the conda `openvis` environment:
 ```
 jupyter lab
 ```
 This should open a tab in your browser with a navigation pane on the left where you find and open `example.ipynb`. Once inside, if the `openvis` kernel is selected, the _cells_ should be able to run without any issue. Follow the examples from top to bottom to avoid conflicts with the working path location, as it's necessary to leave the folder `examples` to run the VIS and then come back inside `examples` to plot results and to other analysis.
 
 Once opening `example.ipynb` you should see something like below.
-![Screenshot of opened Jupyer lab](./figures/screenshot_jupyter.png)
+![Screenshot of opened Jupyter lab](./figures/screenshot_jupyter.png)
 Note the extra labels showing the "navigation pane" and the place where you select the kernel (here is "openvis2", which I made to test this instructions, but it should be just "openvis" for you).
 
 #### How can I select the `openvis` _kernel_ for the Jupyter lab?
@@ -429,7 +429,7 @@ To be able to select the `openvis` _kernel_ (environment) with all the satisfied
 - Reactivate and relaunch the jupyter lab:
 	```
 	conda activate openvis
-	jupyer lab
+	jupyter lab
    	```
 
 That should make `openvis` available as a _kernel_ within the tab where Jupyter lab is open (see Figure above).
