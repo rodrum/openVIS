@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "De Negri L."
+  given-names: "Rodrigo S."
+  orcid: "https://orcid.org/0000-0003-1283-2579"
+- family-names: "Gheri"
+  given-names: "Duccio"
+  orcid: "https://orcid.org/0000-0003-1554-7845"
+- family-names: "Hupe"
+  given-names: "Patrick"
+  orcid: "https://orcid.org/0000-0003-0864-812X"
+- family-names: "Marchetti"
+  given-names: "Emanuele"
+  orcid: "https://orcid.org/0000-0003-4131-6143"
+- family-names: "Näsholm"
+  given-names: "Peter"
+  orcid: "https://orcid.org/0000-0001-9107-4002"
+- family-names: "Le Pichon"
+  given-names: "Alexis"
+  orcid: "https://orcid.org/0000-0001-6531-069X"
+- family-names: "Labazuy"
+  given-names: "Philippe"
+  orcid: "https://orcid.org/0000-0002-4518-3328"
+- family-names: "Walsh"
+  given-names: "Braden
+  orcid: "https://orcid.org/0000-0001-6685-4365"
+title: "The Volcanic Information System methodology"
+version: 1.0.0
+doi: 10.5281/zenodo.1234
+date-released: 2017-12-18
+url: "https://github.com/rodrum/openVIS"
