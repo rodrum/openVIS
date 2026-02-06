@@ -56,7 +56,10 @@ then continued by Vincent Boulenger during his internship thesis
 project at the Laboratoire Magmas et Volcans (LMV),
 Universite Clermont Auvergne, France, 
 and further modified by me
-(Rodrigo De Negri) during my postdoc at LMV, France as well.
+(Rodrigo De Negri) during my postdoc at LMV, France, within the I-SITE Clermont Auvergne Project 20-25 International Research Center for
+Disaster Sciences and Sustainable Development (CIR-4) and the Volcano Research Center (ClerVolc). 
+
+The current initiative is supported by Geo-INQUIRE, funded by the by the European Commission under project number 101058518 within the HORIZON-INFRA-2021-SERV-01 call.
 
 The code has been released in an effort to involve a larger volcano
 monitoring community that may be interested in testing and developing 
@@ -88,7 +91,7 @@ Many thanks to them for their full support.
 
 Previous to the release of this code, 
 we organized a hands-on workshop at UNIFI 
-(28-29 August 2025, Florence, Italy),
+(28-29 August 2025, Florence, Italy)
 for other researchers thanks to
 [Geo-INQUIRE (project HORIZON-INFRA-2021-SERV-01)](https://www.geo-inquire.eu/dissemination/workshops/volcanic-information-system).
 This experience was important to see how reproducible the 
@@ -106,7 +109,7 @@ Other important parts as well in:
 - [De Negri and Matoza (2023)](https://doi.org/10.1029/2022JB025735): release or ARCADE methodology and test with 2011 Cordón Caulle and 2015 Calbuco eruptions, Chile.
 - [De Negri et al. (2025)](https://doi.org/10.1093/gji/ggaf027): ARCADE methodology applied to multi-year datasets to test temporal resolution on volcanoes from the Vanuatu Archipelago.
 
-The updated methodology behind this code has been documented in [De Negri et al. (2026)]().
+The updated methodology behind this code has been documented in [De Negri et al. (2026, in review)]().
 
 _Note: none of this code or the writing was made with LLM/genAI tools. We thrive for reproducible research, want to acknowledge the efforts of all previous developments in the methodology, and hope this code is used following those principles as well._
 
@@ -132,7 +135,7 @@ Open a terminal, and go to the location of the project folder in your computer (
 
 Create a "conda environment", which will satisfy the necessary Python dependencies with:
 
-`$ conda env create -n openvis numpy pandas xarray netcdf4 toml tqdm obspy -c conda-forge`
+`$ conda create -n openvis numpy pandas xarray netcdf4 toml tqdm obspy -c conda-forge`
 
 Note that:
 - the conda environment name will be `openvis`
@@ -216,7 +219,10 @@ examples/
 The `figures` folder, with some figures for this README:
 ```
 figures/
+├── example-results.png --> example results figures (you can reproduce this in examples/example.ipynb)
+├── screenshot_jupyter.png --> a screenshot of the Jupyter lab tab
 └── vis_diagram.png --> diagram
+
 ```
  
 An the LICENSE (CeCILL FREE SOFTWARE LICENSE AGREEMENT v2.1):
