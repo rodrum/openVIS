@@ -12,7 +12,7 @@ The VIS aims to enable near-real-time monitoring of volcanic eruptions,
 and it's designed to use infrasound array detections similar to the
 bulletins from the International Monitoring System infrasound network
 ([see IMS map](https://www.ctbto.org/our-work/ims-map)),
-which has a global network of infrasound arrays (54 ot 60 planned; see [Marty, 2019](https://doi.org/10.1007/978-3-319-75140-5_1)).
+which has a global network of infrasound arrays (54 of 60 planned; see [Marty, 2019](https://doi.org/10.1007/978-3-319-75140-5_1)).
 
 Currently, this code is only able to perform analysis with "historical"
 data, that is, not real-time analysis.
@@ -119,7 +119,7 @@ Please cite as part of the following paper:
 - [De Negri et al. (2026, in review)]()
 
 and as the Zenodo repository as well:
-- [ADD ZENODO REPO HERE]()
+- [De Negri L., R. S., Gheri, D., Hupe, P., Marchetti, E., Näsholm, S. P., Le Pichon, A., Labazuy, P., & Walsh, B. (2026). The Volcanic Information System. Zenodo. https://doi.org/10.5281/zenodo.18509779](https://doi.org/10.5281/zenodo.18509779)
 
 ## How to use
 
