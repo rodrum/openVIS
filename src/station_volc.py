@@ -15,6 +15,11 @@ from src.infrasoundlib.station import Station
 from src.logger import logger
 from src.volcano import Volcano
 
+from src.settings import ATTEN_FORMULA
+atten_func = attenuation.att_LP25_mean
+if ATTEN_FORMULA == 'LP12':
+    atten_func = attenuation.att_LP12
+
 
 class StationVolc(Station):
     """
@@ -220,13 +225,19 @@ class StationVolc(Station):
             d for d in self.detections if sd <= d.t_start < ed  # type: ignore
         ]
         vratio = attenuation.interpolate_vratio(self.v_ratio, sd)
+        
         if detections:
             for det in detections:
                 if det.f_mean is None:
                     raise TypeError("Mean freq of detection is unknown (None)")
-                det.attenuation = attenuation.calculate_att_coeff(
-                    det.f_mean, vratio, self.distaz["dkm"]
-                )
+                elif det.f_mean > 1.6:
+                    det.attenuation = attenuation.att_LP12(
+                        det.f_mean, vratio, self.distaz["dkm"]
+                    )
+                else:
+                    det.attenuation = atten_func(
+                                        det.f_mean, vratio, self.distaz["dkm"]
+                    )
             dets_to_remove = [
                 d for d in detections if d.amp / d.attenuation > max_amp  # type: ignore
             ]
