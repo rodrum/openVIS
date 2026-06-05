@@ -164,7 +164,7 @@ def find_closest_indexes(arr: list[float], target: float) -> tuple[int, int]:
     return int(idx - 1), int(idx)
 
 
-def calculate_att_coeff(freq: float, vratio: float, dist: float) -> float:
+def att_LP12(freq: float, vratio: float, dist: float) -> float:
     """
     Calculate attenuation coefficient.
 
@@ -227,8 +227,7 @@ for i, row in tqdm(detections_i02.iterrows(), total=len(detections_i02)):
     amp = row['amp']
     t_start = row['t_start']
     vratio = get_vratio(baz_i02, t_start, veff_i02)['value'].values[0]
-    att_coeff = calculate_att_coeff(freq, vratio, d_i02/1e3)
+    att_coeff = att_LP12(freq, vratio, d_i02/1e3)
     att_coeffs.append(att_coeff)
     if amp/att_coeff < max_amp:
         dets_to_use.append(row)
-breakpoint()
