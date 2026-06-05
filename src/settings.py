@@ -35,6 +35,7 @@ STATIONS = [
     sta.upper() for sta in config['STATIONS']['StationList']
 ]
 
+
 # Paths -----------------------------------------------------------------------
 BULL_PATH = config['PATHS']['Bulletins']
 VEFF_PATH = config['PATHS']['VeffRatios']
@@ -53,6 +54,10 @@ for path_i in list_of_paths:
         logger.warning(f"Created {path_i}.")
     else:
         logger.info(f"Path {path_i} found")
+
+# Path to binary values from A. Le Pichon et al. (2025)
+PE_FIT_STRATO_NEW = join(BASE_DIR, 'cfg', 'PE_FIT_STRATO_NEW.mat')
+# NOTE: complete check that exists, and selection of this option
 
 
 # 'Smart' results subfolder (If only)
@@ -77,6 +82,11 @@ elif VEFF_FORMAT not in allowed_veff_formats:
     logger.error(f"VeffFormat not in: {allowed_veff_formats}")
     sys.exit(0)
 
+ATTEN_FORMULA = config['FORMATS']['Attenuation']
+allowed_atten_formulas = ['LP12', 'LP25']
+if ATTEN_FORMULA not in allowed_atten_formulas:
+    logger.error(f"Attenuation not in: {allowed_atten_formulas}")
+    sys.exit(0)
 
 # Processing parameters -------------------------------------------------------
 # Minimum time interval between 2 notifications
@@ -145,7 +155,8 @@ else:
 
 name_config = f"{start_date_str}_{end_date_str}" +\
             f"{select_volcs}" +\
-            f".{num_stats}stats.{veff_ratio}.{bazdev}.toml"
+            f".{num_stats}stats.{veff_ratio}.{bazdev}" +\
+            f".{ATTEN_FORMULA}atten.toml"
 
 # Save file in DATA_PATH for future reference
 shutil.copyfile(join(BASE_DIR, 'cfg', 'vis_config.toml'),
