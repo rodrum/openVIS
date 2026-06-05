@@ -5,9 +5,11 @@ This module is used to handle Vratios
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
+import scipy.io as sio
 
 from src.infrasoundlib.vratio import Vratio
 from src.logger import logger
+from src.settings import PE_FIT_STRATO_NEW
 
 from .util import bilinear_interpolation
 
@@ -27,10 +29,56 @@ LST_SIGMA = [79, 55, 43, 36, 27, 20]
 
 DELTA = 180  # Width of shadow zone (km)
 
+# Binary values from Le Pichon et al. (2025), for "LP25" version
+LP25_values = sio.loadmat(PE_FIT_STRATO_NEW)
+LP25_freqs = LP25_values['F0_ALL_I']
+LP25_ceffrs = LP25_values['CEFF_FIT_ALL_I'][0]
+LP25_alpha  = LP25_values['ALPHA_MEAN_ORIG_LISS_I']
+LP25_beta = LP25_values['BETA_MEAN_ORIG_LISS_I']
+LP25_alpha_s = LP25_values['A0_SHADOW_ORIG_LISS_I']
+LP25_d_s = LP25_values['D_SHADOW_ORIG_LISS_I'][0]
+LP25_alpha_g = LP25_values['GAUSS5_ORIG_LISS_I']
+LP25_R_s = LP25_values['TAUS']
+LP25_R_g = LP25_values['RG']
 
-def calculate_att_coeff(freq: float, vratio: float, dist: float) -> float:
+
+def att_LP25_mean(freq: float, vratio: float, dist: float) -> float:
+    """
+    dist: distance [km]
+    freq: source frequency [Hz] [0.05-1.6] Hz
+    vratio: max effective sound speed ratio 30-70 km [0.7-1.4]
+
+    Follows Le Pichon et al. (2025) doi:10.1029/2025JD044937
+
+    It's called *_mean because the attenuation coefficient it's calculated
+    with the mean of the set of coefficients calculated with the 2D-PE 
+    simulation data (tables S1, S2, S3, S4, and S5). 
+    """
+
+    ifreq = np.argmin(np.abs(freq-LP25_freqs))
+    iceff = np.argmin(np.abs(vratio-LP25_ceffrs))
+
+    # in km
+    R0 = 1
+    # DSIM = np.arange(1, 4001, 1)  #1:4000;
+
+    A_p = (dist **
+      (-1*LP25_alpha[ifreq,iceff] *
+        (1+LP25_alpha_s[ifreq,iceff] *
+          (1-np.cos(2*np.pi*(dist-R0)/LP25_d_s[iceff])) *
+          np.exp(-(dist-R0)/LP25_R_s))) *
+        np.exp(1*LP25_alpha_g[ifreq,iceff]*(dist-R0) *
+            np.exp(-(dist-R0)/LP25_R_g)) *
+        np.exp(-1*(dist-R0)*LP25_beta[ifreq,iceff]))
+
+    return A_p[0][0]
+
+
+def att_LP12(freq: float, vratio: float, dist: float) -> float:
     """
     Calculate attenuation coefficient.
+
+    Follows Le Pichon et al. (2012) doi:10.1029/2011JD016670
 
     Parameters
     ----------
