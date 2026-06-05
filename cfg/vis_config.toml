@@ -33,6 +33,7 @@ Results           = './examples/results'
 
 [FORMATS]
 VeffFormat        = 'BGR' # options: BGR, CLIM, or false if not used
+Attenuation       = 'LP25' # options: LP12 and LP25
 
 [PROCESSING]
 # Minimum duration in seconds to send a notification. Every time the eruption
@@ -51,5 +52,5 @@ DeltaClose   = 21600  # [s]
 NumBazStd    = 2
 StaCloseConfidence = 500  # [km]
 MinMeanFreq = 1.0  # [Hz]
-MaxMeanFreq = 3.0
+MaxMeanFreq = 1.6
 RefSpeed =  0.30  # [km/s]
