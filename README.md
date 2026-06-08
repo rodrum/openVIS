@@ -117,7 +117,8 @@ Additionally, please note that the bulk of this methodology has been documented 
 - [Gheri et al. (2025)](https://doi.org/10.1016/j.jvolgeores.2025.108320): first global, systematic use of VIS methodology with historical data (2010-2019) from infrasound stations at ~1000-2000 km from active volcanoes.
  
 Other important parts are as well in:
-- [Le Pichon et al., (2012)](https://doi.org/10.1029/2011JD016670): the attenuation coefficient formula, implemented in this code.
+- [Le Pichon et al., (2012)](https://doi.org/10.1029/2011JD016670): the attenuation coefficient formula ("LP12"), implemented in this code.
+- [Le Pichon et al., (2025)](https://doi.org/10.1029/2025JD044937): the updated attenuation coefficient formula ()"LP25"), implemented in this code.
 - [Ripepe et al. (2018)](https://doi.org/10.1029/2018JB015561): first use of IP idea and tests with local data from Etna, Italy.
 - [De Negri and Matoza (2023)](https://doi.org/10.1029/2022JB025735): release or ARCADE methodology and test with 2011 Cordón Caulle and 2015 Calbuco eruptions, Chile.
 - [De Negri et al. (2025)](https://doi.org/10.1093/gji/ggaf027): ARCADE methodology applied to multi-year datasets to test temporal resolution on volcanoes from the Vanuatu Archipelago.
@@ -166,7 +167,8 @@ The `cfg` folder, containing the configuration files:
 cfg 
 ├── stations.csv -> file with example available stations in name,lat,lon CSV format (see header)
 ├── vis_config.toml -> configuration file for VIS run, here all the parameters are set. See below for detailed description.
-└── volcanoes.csv -> CSV list of volcanoes separated by ';' and in European number format. Comes from Smithsonian. See header for more detailed column description.
+├── volcanoes.csv -> CSV list of volcanoes separated by ';' and in European number format. Comes from Smithsonian. See header for more detailed column description.
+└── PE_FIT_STRATO_NEW.mat -> Matlab binary with tables that serve to use LP25. 
 ```
 
 The `src` folder, containing the actual code:
@@ -175,7 +177,7 @@ src
 ├── db_vis.py -> deals with 'database' creation (in reality, Pandas DataFrames in Python binaries), and loading of data into them
 ├── eruption.py -> defines Eruption class plus other eruption-related functions
 ├── infrasoundlib
-│   ├── attenuation.py -> deals with the calculation of the attenuation coefficient (Le Pichon et at., 2012)
+│   ├── attenuation.py -> deals with the calculation of the attenuation coefficient (Le Pichon et at. 2012, 2025)
 │   ├── detection.py -> defines Detection class
 │   ├── __init__.py
 │   ├── station.py -> defines Station class
@@ -369,14 +371,16 @@ The name of this file starts with the start date and end date of the run (`Start
 
 #### Section `[FORMATS]`
 
-The only parameter here is `VeffFormat`, which should be either
-`'BGR'`, `'CLIM'`, or `false`.
+- `VeffFormat` defines the format of the Veff-ratio data, which should be either
+`'BGR'`, `'CLIM'`, or `false` (not using).
 
 `BGR` (binaries shared by the BGR, based on [ECMWF](www.ecmwf.int) high-resultion profiles) means the veff-ratios are Matlab binaries. See `examples/example.ipynb` to get an idea of how these binaries look.
 
 `CLIM` (after using empirical climatologies to calculate them) means the files are netCDF binaries (`.nc`), with a similar structure to the above. This is an implementation I have tried that allows for a good-enough realistic approach, but requires you to manipulate the Horizontal Wind Model ([Drob et al., 2015](https://doi.org/10.1002/2014EA000089)) and MSIS2.0 libraries ([Emmert et al., 2020](https://doi.org/10.1029/2020EA001321)).
 
 `false` is set when no veff-ratio data are available, forcing the VIS to assume they are 1. 
+
+- `Attenuation` defines the attenuation formula to be used, which are `'LP12'` (Le Pichon et al., 2012) or `'LP25'` (Le Pichon et al., 2025). We recommend to use `LP25`, but note this will limit the data input up to 1.6 Hz.
 
 _Note: `[FORMATS]` is a somewhat redundant. In the future I'd like to induce the format of each file by the file name only (as it happens with the bulletins)._
 
