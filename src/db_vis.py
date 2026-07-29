@@ -815,6 +815,9 @@ def get_filtered_detections_from_db(
         # strato_arriv = bazdevs[5] # list of booleans if there are strato arrivals
                                     # per day
         n_times = bazdevs[6] # number of arrivals per day
+        calc_doys = bazdevs[2]  # actual calcualted doys from which the
+                                # interpolation is calculated. It should be the
+                                # same size as n_times.
 
         # Iterate by day =======================================================
         delta_time = t_max - t_min
@@ -869,7 +872,15 @@ def get_filtered_detections_from_db(
                 lists = [set(li) for li in lists]
                 inds_3 = list(lists[0].intersection(*lists))
             this_std = 0
-            if n_times[this_doy-1] >= 3:
+
+            if len(n_times) < 365:
+                # this means the interpolations were calculated in time steps
+                # bigger than a day (sparse), so find a workaround
+                nearest_day = np.abs(calc_doys-this_doy)
+                ind_min = np.where(nearest_day == np.min(nearest_day))[0]
+                if n_times[ind_min] >= 3:
+                    this_std = np.mean(std_av[inds_3]) if len(std_av[inds_3]) > 0 else 0
+            elif n_times[this_doy-1] >= 3:
                 this_std = np.mean(std_av[inds_3]) if len(std_av[inds_3]) > 0 else 0
 
             # ----------------------------------------------
@@ -967,18 +978,17 @@ def fill_vratio_clim(vratio_file):
         t_ii = 0
         logger.info(f"Importing {vratio_file}...")
         while t_0 + t_step*t_ii < t_end:
-            all_veff_circle = []
+            # all_veff_circle = []
             for (t_i, az_i) in tqdm(product(range(num_times), range(1, num_az)),
                                     total=num_times*(num_az-1)):
                 dt = t_0 + t_step*t_i
-                all_veff_circle.append(
-                    float(vratio_data['veff_ratio'][t_i, az_i].data)
-                )
-                if int(az_i) % 360 == 0:
-                    all_times.append(dt.replace(tzinfo=timezone.utc))
-                    all_veff.append(all_veff_circle)
-                    all_veff_circle = []
-
+                all_veff.append(
+                        [
+                            dt.replace(tzinfo=timezone.utc),
+                            az_i,
+                            float(vratio_data['veff_ratio'][t_i, az_i].data)
+                        ]
+                    )
                 if dt >= t_end:  # Don't get more than needed, this is expensive
                     if int(az_i) % 360 == 0:
                         break
@@ -987,7 +997,8 @@ def fill_vratio_clim(vratio_file):
                            t_0.hour, t_0.minute, t_0.second)
             t_ii += 1
 
-        return all_times, all_veff
+        # return all_times, all_veff
+        return all_veff
     else:
         logger.warning(
             f"File {vratio_file} not found!"
@@ -1586,31 +1597,18 @@ def load_data(stats_tab, stats_detecting, volcs_tab, start_time, end_time) -> No
             logger.warning(f"Veff-ratios already loaded. Skipping...")
 
         for file_i, sta_name_i in zip(files_to_load, sta_names_to_load):
-            veff_time, veff_ratio = fill_vratio_clim(join(VEFF_PATH, file_i))
+            veff_ratios = fill_vratio_clim(join(VEFF_PATH, file_i))
             logger.info(f"-> Saving {file_i}...")
             veff_data = pd.DataFrame(
                     {
-                        'dt': veff_time[0],
-                        'name': sta_name_i,
-                        'azimuth': np.arange(1, 361, 1),
-                        'value': veff_ratio[0]
+                        'dt'        : [v[0] for v in veff_ratios],
+                        'name'      : sta_name_i,
+                        'azimuth'   : [v[1] for v in veff_ratios],
+                        'value'     : [v[2] for v in veff_ratios]
                     }
                 )
-
-            for i in tqdm(range(1, len(veff_time)), total=len(veff_time)-1):
-                veff_data_aux = pd.DataFrame(
-                    {
-                        'dt': veff_time[i],
-                        'name': sta_name_i,
-                        'azimuth': np.arange(1, 361, 1),
-                        'value': veff_ratio[i]
-                    }
-                )
-                veff_data = pd.merge(veff_data, veff_data_aux, how='outer')
-
             if veff_in is not None:
-                veff_in = pd.merge(veff_in, veff_data, how='outer')
-                logger.info("-> Merged into veff-ratio file.")
+                logger.info("-> Done.")
             else:
                 veff_in = veff_data.copy()
     elif VEFF_FORMAT is False:
