@@ -28,6 +28,7 @@ VOLCANO_TABLE = join(BASE_DIR, 'cfg', config['VOLCANOES']['VolcanoesTable'])
 MONITORING_AREA = config['VOLCANOES']['Area']
 REGIONS = config['VOLCANOES']['Regions']
 VOLCANOES = config['VOLCANOES']['VolcanoesList']
+FILTER = config['VOLCANOES']['FilterUnknown']
 
 # Stations selected
 STATIONS_TABLE = join(BASE_DIR, 'cfg', config['STATIONS']['StationsTable'])

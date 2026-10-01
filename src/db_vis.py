@@ -272,16 +272,23 @@ def get_volcano_code(volcs, volc: int):
         return None
 
 
-def get_volcanoes_from_gvp_database(volcano_path: str) -> pd.DataFrame:
+def get_volcanoes_from_gvp_database(volcano_path: str, filter_unknown=True) -> pd.DataFrame:
     """
     Get a list of interesting volcanoes from the very complete GVP database.
 
     Only volcanoes that have a recorded eruption since 2003 are selected in the
     VIS database.
 
+    Parameters
+    ----------
+    volcano_path : str, path to volcano CSV file (`volcanoes.csv`)
+    filter_unknown : bool, if True it does not consider volcanoes with unknown
+        last eruption and last eruption dates > 200
+        (i.e., IMS started recording)
+
     Returns
     -------
-    :class:`pandas.DataFrame`
+    defclass : `pandas.DataFrame`
         Filtered dataframe containing the volcanoes.
 
     Notes
@@ -317,21 +324,24 @@ def get_volcanoes_from_gvp_database(volcano_path: str) -> pd.DataFrame:
         ]
     ].copy()
     lke = "Last Known Eruption"
-    # Filter all volcanoes with lke unknown and BCE (BC equivalent)
-    volcanoes.drop(
-        volcanoes[
-            (volcanoes[lke] == "Unknown") | (volcanoes[lke].str.contains("BCE"))
-        ].index,
-        inplace=True,
-    )
-    # Filter all volcanoes with lke before 2003
-    # (year where we have most of the IMS data)
-    volcanoes.drop(
-        volcanoes[
-            volcanoes[lke].str.extract(r"([\d]+)", expand=False).astype(int) < 2003  
-        ].index,
-        inplace=True,
-    )
+
+    if filter_unknown is True:
+        # Filter all volcanoes with lke unknown and BCE (BC equivalent)
+        volcanoes.drop(
+            volcanoes[
+                (volcanoes[lke] == "Unknown") | (volcanoes[lke].str.contains("BCE"))
+            ].index,
+            inplace=True,
+        )
+        # Filter all volcanoes with lke before 2003
+        # (year where we have most of the IMS data)
+        volcanoes.drop(
+            volcanoes[
+                volcanoes[lke].str.extract(r"([\d]+)", expand=False).astype(int) < 2003
+            ].index,
+            inplace=True,
+        )
+
     # Create escape character for sql request
     volcanoes.replace("'", "''", regex=True, inplace=True)
     # replace coma by points in number
@@ -350,6 +360,7 @@ def get_volcanoes_from_gvp_database(volcano_path: str) -> pd.DataFrame:
     )
 
     return volcanoes
+
 
 
 def read_volcanoes_from_db(volcs_tab):
@@ -738,6 +749,59 @@ def drop_none_row_from_dataframe(dataframe_input, col_name):
     return dataframe_input
 
 
+def get_filtered_detections_from_db_static(
+    detections,
+    sta: StationVolc,
+    t_min: datetime,
+    t_max: datetime,
+) -> list[Detection]:
+    """
+    Get detections from the database for a given :class:`.Station` name.
+
+    Detections are filtered by time and by azimuth.
+
+    Parameters
+    ----------
+    session : Session
+        Session for sqlalchemy local database.
+    sta : :class:`.StationVolc`.
+        Station at which we get detections.
+    t_min : datetime
+        Filter detection received after this time.
+    t_max : datetime
+        Filter detection received before this time.
+
+    Returns
+    -------
+    :obj:`list` of :class:`.Detection`
+        List of detections meeting the criteria.
+
+    """
+
+    lst_det = []
+
+    if BAZDEV_PATH is False:
+        logger.info(f"Using static back-azimuth tolerance with DAZIM={DAZIM}")
+        # Select detections at the given station
+        cond1 = detections['station_id'] == sta.name
+        # Select by date
+        cond2 = (detections['t_start'] >= t_min) & (detections['t_start'] < t_max)
+        # Select by frequencies
+        cond3 = (detections['f_mean'] >= MIN_MEAN_FREQ) & (detections['f_mean'] <= MAX_MEAN_FREQ)
+
+        cond4 = None
+        if sta.baz_min > sta.baz_max:
+            cond4 = (detections['azi'] >= sta.baz_min) | (detections['azi'] <= sta.baz_max)
+        else:
+            cond4 = (detections['azi'] >= sta.baz_min) & (detections['azi'] <= sta.baz_max)
+
+        lst_det_db = detections[cond1 & cond2 & cond3 & cond4]
+        for i in range(len(lst_det_db)):
+            det_db = lst_det_db.iloc[i]
+            lst_det.append(detection_from_dbo(det_db))
+    return lst_det
+
+
 def get_filtered_detections_from_db(
     sta: StationVolc,
     t_min: datetime,
@@ -767,6 +831,7 @@ def get_filtered_detections_from_db(
 
     """
 
+    logger.info(f"Attempting to add back-azimuth deviations for station {sta.name}")
     detections = pd.read_pickle(join(DATA_PATH, 'detections.pkl'))
 
     t_min -= timedelta(seconds=IP_TIME_INTERVAL - ANALYSIS_TIME_INTERVAL)
@@ -774,27 +839,28 @@ def get_filtered_detections_from_db(
     lst_det = []
 
     if BAZDEV_PATH is False:
-        logger.info(f"Using static back-azimuth tolerance with DAZIM={DAZIM}")
-        # Select detections at the given station
-        cond1 = detections['station_id'] == sta.name
-        # Select by date
-        cond2 = (detections['t_start'] >= t_min) & (detections['t_start'] < t_max)
-        # Select by frequencies
-        #cond3 = (detections['f_mean'] >= MIN_MEAN_FREQ) & (detections['f_mean'] <= 4.0)
-        cond3 = (detections['f_mean'] >= MIN_MEAN_FREQ) & (detections['f_mean'] <= MAX_MEAN_FREQ)
-
-        cond4 = None
-        if sta.baz_min > sta.baz_max:
-            cond4 = (detections['azi'] >= sta.baz_min) | (detections['azi'] <= sta.baz_max)
-        else:
-            cond4 = (detections['azi'] >= sta.baz_min) & (detections['azi'] <= sta.baz_max)
-
-        lst_det_db = detections[cond1 & cond2 & cond3 & cond4]
-        for i in range(len(lst_det_db)):
-            det_db = lst_det_db.iloc[i]
-            lst_det.append(detection_from_dbo(det_db))
+        lst_det = get_filtered_detections_from_db_static(detections, sta, t_min, t_max)
+        #logger.info(f"Using static back-azimuth tolerance with DAZIM={DAZIM}")
+        ## Select detections at the given station
+        #cond1 = detections['station_id'] == sta.name
+        ## Select by date
+        #cond2 = (detections['t_start'] >= t_min) & (detections['t_start'] < t_max)
+        ## Select by frequencies
+        ##cond3 = (detections['f_mean'] >= MIN_MEAN_FREQ) & (detections['f_mean'] <= 4.0)
+        #cond3 = (detections['f_mean'] >= MIN_MEAN_FREQ) & (detections['f_mean'] <= MAX_MEAN_FREQ)
+        #
+        #cond4 = None
+        #if sta.baz_min > sta.baz_max:
+        #    cond4 = (detections['azi'] >= sta.baz_min) | (detections['azi'] <= sta.baz_max)
+        #else:
+        #    cond4 = (detections['azi'] >= sta.baz_min) & (detections['azi'] <= sta.baz_max)
+        #
+        #lst_det_db = detections[cond1 & cond2 & cond3 & cond4]
+        #for i in range(len(lst_det_db)):
+        #    det_db = lst_det_db.iloc[i]
+        #    lst_det.append(detection_from_dbo(det_db))
     else:
-        logger.info("Using back-azimuth deviations to define back-azimuth tolerance")
+        logger.info("-- Using back-azimuth deviations to define back-azimuth tolerance")
         # Get interpolations ===================================================
         volc_name = ''
         if len(region.volcanoes) == 1:
@@ -807,7 +873,14 @@ def get_filtered_detections_from_db(
         # NOTE: the interpolation format is not final. For now, it's a list
         #       containing the inerpolation data, plus extra information that
         #       helps deciding if using the interpolation values or not.
-        bazdevs = pickle.load(open(join(BAZDEV_PATH, this_interp), 'rb'))
+        try:
+            bazdevs = pickle.load(open(join(BAZDEV_PATH, this_interp), 'rb'))
+        except FileNotFoundError:
+            logger.warning(f"-- No back-azimuth deviation interpolation for station {sta.name}")
+            logger.warning('-- Using static tolerance.')
+            lst_det = get_filtered_detections_from_db_static(detections, sta, t_min, t_max)
+            return lst_det
+
         bazdevs_days = bazdevs[0]  # doys from interpolation
         bazdevs_vals = bazdevs[1]  # interp. of average daily back-azimuth deviation
         std_days = bazdevs[7]  # doys from interps. with at least four bazdevs

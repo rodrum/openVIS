@@ -37,6 +37,7 @@ from src.region import Region
 from src.settings import (
     STATIONS_TABLE,
     VOLCANO_TABLE,
+    FILTER,
     BULL_PATH,
     DATA_PATH,
     START_DATE,
@@ -66,7 +67,7 @@ def main() -> None:
     start_d = START_DATE.replace(tzinfo=timezone.utc)
     end_d = END_DATE.replace(tzinfo=timezone.utc)
 
-    volc_tables = get_volcanoes_from_gvp_database(VOLCANO_TABLE)
+    volc_tables = get_volcanoes_from_gvp_database(VOLCANO_TABLE, FILTER)
     stat_tables = pd.read_csv(STATIONS_TABLE)
 
     lst_eruptions: list[Eruption] = []
